@@ -18,6 +18,16 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include("post.urls"))
+     #  обработчик для главной страницы ищем в urls.py приложения posts
+    path("", include("post.urls")),
+
+    #  регистрация и авторизация
+    path("auth/", include("Users.urls")),
+
+    #  если нужного шаблона для /auth не нашлось в файле users.urls — 
+    #  ищем совпадения в файле django.contrib.auth.urls
+    path("auth/", include("django.contrib.auth.urls")),
+
+    #  раздел администратора
+    path("admin/", admin.site.urls),
 ]
