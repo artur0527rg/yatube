@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render
 
 #  импортируем CreateView, чтобы создать ему наследника
