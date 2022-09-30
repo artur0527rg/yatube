@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from .models import Post, Group
+from .forms import PostForm
 
 # Create your views here.
 def index(request):
@@ -25,3 +26,14 @@ def group_posts(request, slug):
     # # условия WHERE group_id = {group_id}
     posts = Post.objects.filter(group=group).order_by("-pub_date")[:12]
     return render(request, "group.html", {"group": group, "posts": posts})
+
+def new_post(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid:
+            form.instance.author = request.user
+            post = form.save()
+            return redirect('index')
+    else:
+        form = PostForm()
+    return render(request, 'post/new_post.html', context={"form":form})
