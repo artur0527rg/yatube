@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 
+from django.shortcuts import get_object_or_404
+
 from .models import Post, Group
 from .forms import PostForm
 
@@ -20,15 +22,8 @@ def index(request):
 
 # view-функция для страницы сообщества
 def group_posts(request, slug):
-    # функция get_object_or_404 получает по заданным критериям объект из базы данных 
-    def get_object_or_404(group, slug):
-        try:
-            object = Group.objects.get(slug = slug)
-            return object
-        except :
-            pass
-    
-    # или возвращает сообщение об ошибке, если объект не найден
+    # функция get_object_or_404 получает по заданным критериям объект из базы данных
+    # # или возвращает сообщение об ошибке, если объект не найден
     group = get_object_or_404(Group, slug=slug)
     
     # # Метод .filter позволяет ограничить поиск по критериям. Это аналог добавления
