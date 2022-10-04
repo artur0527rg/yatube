@@ -15,11 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.flatpages import views
 
 
 urlpatterns = [
      #  обработчик для главной страницы ищем в urls.py приложения posts
     path("", include("post.urls")),
+
+     # flatpages
+    path('about/', include('django.contrib.flatpages.urls')),
 
     #  регистрация и авторизация
     path("auth/", include("Users.urls")),
@@ -30,4 +34,13 @@ urlpatterns = [
 
     #  раздел администратора
     path("admin/", admin.site.urls),
+]
+
+# новые пути, имитируем злого SEO)
+urlpatterns += [
+    path('rasskaz-o-tom-kakie-my-horoshie/', views.flatpage, {'url': '/about-us/'}, name='about'),
+    path('about-us/', views.flatpage, {'url': '/about-us/'}, name='about'),
+    path('terms/', views.flatpage, {'url': '/terms/'}, name='terms'),
+    path('about-author/', views.flatpage, {'url': '/about-author/'}, name='terms'),
+    path('about-spec/', views.flatpage, {'url': '/about-spec/'}, name='terms'),
 ]
