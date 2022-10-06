@@ -7,7 +7,13 @@
 <div class="row justify-content-center">
     <div class="col-md-8 p-5">
         <div class="card">
-            <div class="card-header">Добавить запись в сообщество</div>
+            <div class="card-header">
+                {% if edit %}
+                Редактировать запись
+                {% else %}
+                Добавить запись в сообщество
+                {% endif %}
+            </div>
             <div class="card-body">
                 
               {% for error in form.errors %}
@@ -16,7 +22,7 @@
                   </div>
                 {% endfor %}
 
-                <form method="post" action="{% url 'new_post' %}">
+                <form method="post" action="{% if edit_page %}{% url 'post_edit' username=user.username post_id=post.id %}{% else %}{% url 'new_post' %}{% endif %}">
                     {% csrf_token %}
 
                     {% for field in form %}
@@ -36,7 +42,11 @@
 
                     <div class="col-md-6 offset-md-4">              
                             <button type="submit" class="btn btn-primary">
+                                {% if edit_page %}
+                                Сохранить
+                                {% else %}
                                 Добавить пост
+                                {% endif %}
                             </button>
                     </div>
                 </form>
