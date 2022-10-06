@@ -107,7 +107,7 @@ def post_edit(request, username, post_id):
             form = PostForm(instance=post)
             return render(request, 'post/new_post.html', context={"form":form, 'edit_page':True, 'post':post})
     else:
-        return HttpResponseNotFound("<h1>У вас нет доступа для редактирования данной записи</h1>")     
+        return redirect('post', username=username, post_id=post_id)     
 
     # В качестве шаблона страницы редактирования укажите шаблон создания новой записи
     # который вы создали раньше (вы могли назвать шаблон иначе)
