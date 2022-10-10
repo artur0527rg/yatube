@@ -20,9 +20,7 @@ from django.contrib.flatpages import views
 
 urlpatterns = [
     # админка в перую очередь
-    path('admin/', admin.site.urls),
-     #  обработчик для главной страницы ищем в urls.py приложения posts
-    path("", include("post.urls")),
+    path('admin_login/', admin.site.urls),
 
      # flatpages
     path('about/', include('django.contrib.flatpages.urls')),
@@ -34,15 +32,20 @@ urlpatterns = [
     #  ищем совпадения в файле django.contrib.auth.urls
     path("auth/", include("django.contrib.auth.urls")),
 
-    #  раздел администратора
-    path("admin/", admin.site.urls),
 ]
 
 # новые пути, имитируем злого SEO)
 urlpatterns += [
     path('rasskaz-o-tom-kakie-my-horoshie/', views.flatpage, {'url': '/about-us/'}, name='about'),
     path('about-us/', views.flatpage, {'url': '/about-us/'}, name='about'),
-    path('terms/', views.flatpage, {'url': '/terms/'}, name='terms'),
-    path('about-author/', views.flatpage, {'url': '/about-author/'}, name='terms'),
-    path('about-spec/', views.flatpage, {'url': '/about-spec/'}, name='terms'),
+    path('about-author/', views.flatpage, {'url': '/about-us/'}, name='about'),
+    path('about-spec/', views.flatpage, {'url': '/about-spec/'}, name='spec'),
+]
+
+# Костыль. В новых уроках для about создают отдельное приложение,
+# но так как я делал по старым, то структуру оставлю такой.
+urlpatterns +=[
+    #  обработчик для главной страницы ищем в urls.py приложения posts
+    path("", include("post.urls")),
+
 ]
