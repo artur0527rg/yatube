@@ -13,7 +13,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/ c этим параметром не подгружалась статика бутстраппа
 downloads/
 eggs/
 .eggs/
