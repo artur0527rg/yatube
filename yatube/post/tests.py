@@ -94,3 +94,6 @@ class FinalTest(TestCase):
         post_post = response.context['post']
         self.assertEqual(post_post, edit_post, msg="Посте не изменился на отдельной странице")
         
+    def test_page_not_found(self):
+        response = self.client.get('/page_not_found/')
+        self.assertEqual(response.status_code, 404, msg="page_not_found не обработан")

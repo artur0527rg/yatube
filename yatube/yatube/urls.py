@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.flatpages import views
+from django.conf.urls import handler404, handler500
+
+handler404 = "post.views.page_not_found"  # noqa
+handler500 = "post.views.server_error" # noqa
 
 
 urlpatterns = [
