@@ -9,4 +9,4 @@ class PostForm(forms.ModelForm):
         # укажем модель, с которой связана создаваемая форма
         model = Post
         # укажем, какие поля должны быть видны в форме и в каком порядке
-        fields = ("group", "text")
+        fields = ("group", "text", 'image')

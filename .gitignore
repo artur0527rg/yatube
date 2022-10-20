@@ -1,3 +1,7 @@
+# Media and BD
+media/
+.sqlite3
+
 #Editor
 .vscode/
 
@@ -13,6 +17,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
+
 # dist/ c этим параметром не подгружалась статика бутстраппа
 downloads/
 eggs/

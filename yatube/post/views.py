@@ -1,7 +1,3 @@
-from cgi import print_arguments
-from itertools import count
-import re
-from time import process_time_ns
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.paginator import Paginator
@@ -45,7 +41,6 @@ def group_posts(request, slug):
 def new_post(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
-            print(request.body)
             form = PostForm(request.POST)
             if form.is_valid:
                 form.instance.author = request.user
@@ -98,12 +93,10 @@ def post_edit(request, username, post_id):
     # что текущий пользователь — это автор записи.
     user = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, author_id = user, pk = post_id)
-    print(request.user, end="\n\n\n")
     if request.user == user:
         if request.method == 'POST':
-            form = PostForm(request.POST)
+            form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
             if form.is_valid:
-                form = PostForm(request.POST, instance=post)
                 form.save()
                 return redirect('post', username=username, post_id=post_id)
         else:
