@@ -4,7 +4,10 @@ from django.test import TestCase
 from django.test import Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .models import Post
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from .models import Post, Group
+from .forms import PostForm
 
 # Каждый класс — это набор тестов. Имя такого класса принято начинать со слова Test.
 # В файле может быть множество наборов тестов, 
@@ -97,3 +100,38 @@ class FinalTest(TestCase):
     def test_page_not_found(self):
         response = self.client.get('/page_not_found/')
         self.assertEqual(response.status_code, 404, msg="page_not_found не обработан")
+
+
+class ImgTest(TestCase):
+    def setUp(self):
+        # Авторизированный клиент
+        self.aut_client=Client()
+
+        # Cоздание и вход авторезированного юзера
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.login = self.aut_client.login(username='testuser', password='12345')
+
+        self.group = Group.objects.create(title='First group', slug='first_group', description='text')
+    
+
+    def test_page_have_img(self):
+        with open('media/post/file.jpg','rb') as img:
+            self.post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': img})
+        
+        page = self.aut_client.get(f'/{self.user.username}/')
+        self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
+        
+        page = self.aut_client.get(f'/')
+        self.assertIn('<img', str(page.content), msg='Картинки нет на главной странице')
+        
+        page = self.aut_client.get(f'/{self.user.username}/')
+        self.assertIn('<img', str(page.content), msg='Картинки нет на странице автора')
+
+        page = self.aut_client.get(f'/group/first_group/')
+        self.assertIn('<img', str(page.content), msg='Картинки нет на странице группы')
+
+    def test_incorrect_file_format(self):
+        with open('db.sqlite3','rb') as file:
+            post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': file})
+            self.assertEqual(post.status_code, 200, msg='Не сработала валидация файла')
+        
