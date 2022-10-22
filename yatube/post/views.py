@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponseNotFound
 
 from .models import Post, Group
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 
 # Create your views here.
 def index(request):
@@ -85,7 +85,19 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post, pk = post_id)
     author_posts = Post.objects.filter(author_id=post.author_id).order_by('-pub_date')
     amount_posts = len(author_posts)
-    return render(request, 'post/post.html', {'amount_posts':amount_posts, "user_profile":user, 'post':post, 'edit':edit})
+    form = CommentForm()
+    comments = post.comments.all()
+
+    return render(
+        request,
+        'post/post.html',
+        {'amount_posts':amount_posts,
+        "user_profile":user,
+        'post':post,
+        'edit':edit,
+        'form': form,
+        'items': comments
+    })
 
 
 def post_edit(request, username, post_id):
@@ -123,3 +135,15 @@ def page_not_found(request, exception):
 
 def server_error(request):
     return render(request, "misc/500.html", status=500)
+
+def add_comment(request, username, post_id):
+     if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                form.instance.author = request.user
+                form.instance.post = Post.objects.get(pk=post_id)
+                post = form.save()
+        return redirect(f'/{username}/{post_id}/')
+     else:
+        return redirect('index')
