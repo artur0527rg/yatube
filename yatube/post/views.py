@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Q
 from django.http import HttpResponseNotFound
 
-from .models import Post, Group
+from .models import Post, Group, Comment
 from .forms import PostForm, CommentForm
 
 # Create your views here.
 def index(request):
-        post_list = Post.objects.order_by('-pub_date').all()
+        post_list = Post.objects.order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')  
         paginator = Paginator(post_list, 10)  # показывать по 10 записей на странице.
         page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
         page = paginator.get_page(page_number)  # получить записи с нужным смещением
@@ -28,7 +28,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     
     # Метод .filter позволяет ограничить поиск по критериям. Это аналог добавления
-    post_list = Post.objects.filter(group=group).order_by("-pub_date")
+    post_list = Post.objects.filter(group=group).order_by("-pub_date").select_related('group', 'author').prefetch_related('comments')  
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  
@@ -54,7 +54,7 @@ def new_post(request):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    author_posts = Post.objects.filter(author_id=user).order_by('-pub_date').prefetch_related('group')
+    author_posts = Post.objects.filter(author_id=user).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')  
     paginator = Paginator(author_posts, 10)
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  
@@ -73,9 +73,9 @@ def profile(request, username):
 def post_view(request, username, post_id):
     user = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, pk = post_id)
-    author_posts = Post.objects.filter(author_id=post.author_id).order_by('-pub_date')
+    author_posts = Post.objects.filter(author_id=post.author_id).order_by('-pub_date') 
     amount_posts = len(author_posts)
-    form = CommentForm()
+    form = CommentForm()    
     comments = post.comments.all()
 
     return render(

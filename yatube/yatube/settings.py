@@ -34,6 +34,11 @@ ALLOWED_HOSTS = [
     "testserver",
 ]
 
+#Django debug toolbar IPs
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 
 # Application definition
 
@@ -50,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'sorl.thumbnail', # Приложение для раоты с загружаемым фото
+    'debug_toolbar', # Приложение для отладки django debug toolbar
 ]
 
 MIDDLEWARE = [
@@ -60,6 +66,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware', # Django debug toolbar
 ]
 
 ROOT_URLCONF = 'yatube.urls'
