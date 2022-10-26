@@ -1,6 +1,7 @@
 # Media and BD
 media/
-.sqlite3
+db.sqlite3
+.py
 
 #Editor
 .vscode/
