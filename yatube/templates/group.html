@@ -1,20 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Последние обновления на сайте{% endblock %}
-{% block header %}Последние обновления на сайте{% endblock %}
+{% block header %}Сообщество: {{group.title}}{% endblock %}
 {% block content %}
-
-<h1>{{group.title}}</h1>
-    <p>Статьи сообщества</p>
     {%for post in page%}
-    {% load thumbnail %}
-    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
-        <img class="card-img" src="{{ im.url }}">
-    {% endthumbnail %}
-    <h3>
-        Автор: {{post.first_name}} {{post.last_name}}, дата публикации: {{post.pub_date | date:"d F Y"}}
-    </h3>
-    <p>{{post.text}}</p>
-    <hr>
+    {% include 'post_item.html' with post=post %}
     {% endfor %}
 
 {% if page.has_other_pages %}

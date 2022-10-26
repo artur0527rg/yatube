@@ -54,22 +54,16 @@ def new_post(request):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    author_posts = Post.objects.filter(author_id=user).order_by('-pub_date')
+    author_posts = Post.objects.filter(author_id=user).order_by('-pub_date').prefetch_related('group')
     paginator = Paginator(author_posts, 10)
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  
     amount_posts = len(author_posts)
-    if request.user == user:
-        edit = True
-    else:
-        edit = False
-
     return render(
         request,
         'post/profile.html',
         {
-        "edit":edit,
-        "user_profile":user,
+        'user_profile': user,
         "amount_posts":amount_posts,
         'page': page,
         'paginator': paginator
@@ -78,10 +72,6 @@ def profile(request, username):
  
 def post_view(request, username, post_id):
     user = get_object_or_404(User, username=username)
-    if request.user == user:
-        edit = True
-    else:
-        edit = False
     post = get_object_or_404(Post, pk = post_id)
     author_posts = Post.objects.filter(author_id=post.author_id).order_by('-pub_date')
     amount_posts = len(author_posts)
@@ -94,7 +84,6 @@ def post_view(request, username, post_id):
         {'amount_posts':amount_posts,
         "user_profile":user,
         'post':post,
-        'edit':edit,
         'form': form,
         'items': comments
     })

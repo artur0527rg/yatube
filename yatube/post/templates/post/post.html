@@ -50,7 +50,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group ">
                                                 <!-- Ссылка на редактирование, показывается только автору записи -->
-                                                {% if edit %}
+                                                {% if user == post.author %}
                                                 <a class="btn btn-sm text-muted" href="{%url 'post_edit' username=user_profile.username post_id=post.pk %}" role="button">Редактировать</a>
                                                 {% endif %}
                                             </div>
@@ -62,5 +62,5 @@
      </div>
     </div>
 </main>
-{% include 'post/comment.html' %}
+{% include 'post/comment.html' with items=items form=form  %}
 {% endblock%}
