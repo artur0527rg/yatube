@@ -5,6 +5,7 @@ from django.test import Client
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 
 from .models import Post, Group
 from .forms import PostForm
@@ -59,6 +60,8 @@ class FinalTest(TestCase):
         # Создание тестнового поста
         post = Post.objects.create(text = "text1", author = self.user)
 
+        cache.clear() #чистим кеш, что бы нужный пост отобразился
+
         # Проверка поста на главной странице
         response = self.aut_client.get('/')
         index_post = response.context['page'][0]
@@ -80,6 +83,8 @@ class FinalTest(TestCase):
         # Редактирование поста
         edit = self.aut_client.post(f'/{self.user.username}/{post.pk}/edit/', data={'text':'edit text'})
         edit_post = Post.objects.get(pk=post.pk)
+
+        cache.clear() #чистим кеш, что бы нужный пост отобразился
 
         # Проверка изменений
         # Проверка поста на главной странице
@@ -117,7 +122,9 @@ class ImgTest(TestCase):
     def test_page_have_img(self):
         with open('media/post/file.jpg','rb') as img:
             self.post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': img})
-        
+
+        cache.clear() #чистим кеш, что бы нужный пост отобразился
+
         page = self.aut_client.get(f'/{self.user.username}/')
         self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
         
@@ -134,4 +141,29 @@ class ImgTest(TestCase):
         with open('db.sqlite3','rb') as file:
             post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': file})
             self.assertEqual(post.status_code, 200, msg='Не сработала валидация файла')
+
+
+class CacheTest(TestCase):
+    def setUp(self):
+        # Авторизированный клиент
+        self.aut_client=Client()
+
+        # Cоздание и вход авторезированного юзера
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.login = self.aut_client.login(username='testuser', password='12345')
+
+    
+
+    def test_index_page_test(self):
+        cache.clear()# Чистим кеш перед тестом
+
+        post = Post.objects.create(text = "text1", author = self.user)# Создаем тестовый пост
+        response = self.aut_client.get('/')# Кешируем страницу
+        response_cache = self.aut_client.get('/')# Кешируем страницу
+        # Проверяю, передается ли контекст или загружаем страницу с кеша
+        self.assertNotEqual(response.context, response_cache.context, msg='Страница не кешируется')
+        
+
+    
+
         

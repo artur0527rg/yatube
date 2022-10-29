@@ -5,11 +5,13 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
 from django.http import HttpResponseNotFound
+from django.views.decorators.cache import cache_page
 
 from .models import Post, Group, Comment
 from .forms import PostForm, CommentForm
 
 # Create your views here.
+@cache_page(20, key_prefix="index_page")
 def index(request):
         post_list = Post.objects.order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')  
         paginator = Paginator(post_list, 10)  # показывать по 10 записей на странице.

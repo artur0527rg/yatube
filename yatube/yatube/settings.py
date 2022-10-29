@@ -156,6 +156,13 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 # Идентификатор текущего сайта
 SITE_ID = 1
 
+# Возможность кешрования
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 if DEBUG:
     MIDDLEWARE +=[
         'debug_toolbar.middleware.DebugToolbarMiddleware', # Django debug toolbar
