@@ -34,11 +34,6 @@ ALLOWED_HOSTS = [
     "testserver",
 ]
 
-#Django debug toolbar IPs
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-
 
 # Application definition
 
@@ -55,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'sorl.thumbnail', # Приложение для раоты с загружаемым фото
-    'debug_toolbar', # Приложение для отладки django debug toolbar
 ]
 
 MIDDLEWARE = [
@@ -66,8 +60,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'debug_toolbar.middleware.DebugToolbarMiddleware', # Django debug toolbar
 ]
 
 ROOT_URLCONF = 'yatube.urls'
@@ -163,3 +155,15 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
 # Идентификатор текущего сайта
 SITE_ID = 1
+
+if DEBUG:
+    MIDDLEWARE +=[
+        'debug_toolbar.middleware.DebugToolbarMiddleware', # Django debug toolbar
+    ]
+    INSTALLED_APPS +=[
+        'debug_toolbar', # Приложение для отладки django debug toolbar
+    ]
+    #Django debug toolbar IPs
+    INTERNAL_IPS = [
+        "127.0.0.1",
+    ]
