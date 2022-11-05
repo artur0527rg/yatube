@@ -6,8 +6,9 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Q
 from django.http import HttpResponseNotFound
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import login_required
 
-from .models import Post, Group, Comment
+from .models import Post, Group, Follow
 from .forms import PostForm, CommentForm
 
 # Create your views here.
@@ -23,7 +24,7 @@ def index(request):
             {'page': page, 'paginator': paginator}
        )
 
-# view-функция для страницы сообщества
+# view-функция для страницы сообществаgi
 def group_posts(request, slug):
     # функция get_object_or_404 получает по заданным критериям объект из базы данных
     # или возвращает сообщение об ошибке, если объект не найден
