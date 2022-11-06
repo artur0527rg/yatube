@@ -18,8 +18,8 @@
                         <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                         <div class="h6 text-muted">
-                                        Подписчиков: XXX <br/>
-                                        Подписан: XXX
+                                        Подписчиков: {{user_profile.following.count}} <br/>
+                                        Подписан: {{user_profile.follower.count}}
                                         </div>
                                 </li>
                                 <li class="list-group-item">
@@ -28,6 +28,22 @@
                                             Записей: {{amount_posts}}
                                         </div>
                                 </li>
+                                <!-- Если автор статьи мы - конопки подписать быть недолжно -->
+                                {% if not user == user_profile%}
+                                <li class="list-group-item">
+                                        {% if following %}
+                                        <a class="btn btn-lg btn-light" 
+                                                href="{% url 'profile_unfollow' user_profile.username %}" role="button"> 
+                                                Отписаться 
+                                        </a> 
+                                        {% else %}
+                                        <a class="btn btn-lg btn-primary" 
+                                                href="{% url 'profile_follow' user_profile.username %}" role="button">
+                                        Подписаться 
+                                        </a>
+                                        {% endif %}
+                                </li>
+                                {% endif %}
                         </ul>
                 </div>
         </div>

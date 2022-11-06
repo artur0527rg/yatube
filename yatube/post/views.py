@@ -57,6 +57,10 @@ def new_post(request):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
+    try:
+        following = Follow.objects.get(user=request.user, author=user)
+    except Follow.DoesNotExist:
+        following = False
     author_posts = Post.objects.filter(author_id=user).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')  
     paginator = Paginator(author_posts, 10)
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
@@ -69,13 +73,18 @@ def profile(request, username):
         'user_profile': user,
         "amount_posts":amount_posts,
         'page': page,
-        'paginator': paginator
+        'paginator': paginator,
+        'following':following, # Используем только для кнопки "подписаться"
     })
  
  
 def post_view(request, username, post_id):
     user = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, pk = post_id)
+    try:
+        following = Follow.objects.get(user=request.user, author=user)
+    except Follow.DoesNotExist:
+        following = False
     author_posts = Post.objects.filter(author_id=post.author_id).order_by('-pub_date') 
     amount_posts = len(author_posts)
     form = CommentForm()    
@@ -88,7 +97,8 @@ def post_view(request, username, post_id):
         "user_profile":user,
         'post':post,
         'form': form,
-        'items': comments
+        'items': comments,
+        'following':following, # Используем только для кнопки "подписаться"
     })
 
 
@@ -139,3 +149,34 @@ def add_comment(request, username, post_id):
         return redirect(f'/{username}/{post_id}/')
      else:
         return redirect('index')
+
+@login_required()
+def follow_index(request):
+    # Находим подписки в промежуточной таблице
+    follow_list = Follow.objects.filter(user=request.user)
+    print(follow_list, end='\n\n\n')
+    post_list = Post.objects.filter(author__following__in=follow_list).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')
+    print(post_list, end='\n\n\n')
+    paginator = Paginator(post_list, 10)  # показывать по 10 записей на странице.
+    page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
+    page = paginator.get_page(page_number)  # получить записи с нужным смещением
+    return render(
+        request,
+        'follow.html',
+        {'page': page, 'paginator': paginator}
+    )
+    
+    
+
+@login_required()
+def profile_follow(request, username):
+    author = User.objects.get(username=username)
+    Follow.objects.create(user=request.user, author=author)
+    return redirect('profile', username)
+
+@login_required
+def profile_unfollow(request, username):
+    author = User.objects.get(username=username)
+    obj = Follow.objects.get(user=request.user, author=author)
+    obj.delete()
+    return redirect('profile', username)
