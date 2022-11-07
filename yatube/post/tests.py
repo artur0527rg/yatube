@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
-from .models import Post, Group
+from .models import Post, Group, Follow, Comment
 from .forms import PostForm
 
 # Каждый класс — это набор тестов. Имя такого класса принято начинать со слова Test.
@@ -29,7 +29,7 @@ class TestStringMethods(TestCase):
         self.assertTrue(True, msg="Важная проверка на истинность")
 
 # Финальный проект - тест
-class FinalTest(TestCase):
+class FinalTest_5(TestCase):
     def setUp(self):
         # Авторизированный и неавторезированный клиенты
         self.aut_client=Client()
@@ -164,6 +164,80 @@ class CacheTest(TestCase):
         self.assertNotEqual(response.context, response_cache.context, msg='Страница не кешируется')
         
 
-    
+class FinalTest_6(TestCase):
+    def setUp(self):
+        # Авторизированный и неавторезированный клиенты
+        self.aut_client=Client()
+        self.aut_prob_client = Client()
+        self.client = Client()
 
+        # Cоздание и вход авторезированных юзеров
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.login = self.aut_client.login(username='testuser', password='12345')
+
+        self.user2 = User.objects.create_user(username='prob', password='12345')
+        self.login2 = self.aut_prob_client.login(username='prob', password='12345')
+    
+    
+    def test_follow(self):
+        response = self.aut_client.get('/prob/follow/')
+        try:
+            obj = Follow.objects.get(user=User.objects.get(username='testuser'))
+        except Follow.DoesNotExist:
+            obj = False
+
+        self.assertNotEqual(obj, False, msg="Подписка не сработала")
+
+        response = self.aut_client.get('/prob/unfollow/')
+
+        try:
+            obj = Follow.objects.get(user=User.objects.get(username='testuser'))
+        except Follow.DoesNotExist:
+            obj = False
+
+        self.assertEqual(obj, False, msg="Отподписка не сработала")
+
+    def test_timeline(self):
+        # Пользователь, который подписан на "проб", видит его посты
+        response = self.aut_client.get('/prob/follow/')
+        post = Post.objects.create(author=self.user2, text='text')
+        try:
+            response = self.aut_client.get('/follow/').context['page'].object_list[0]
+        except IndexError:
+            response = False
+
+        self.assertNotEqual(response, False, msg='Пользователь не видит постов тех, на кого подписан')
+
+        # "Проб" не видит свой пост в своих подписках
+        try:
+            response = self.aut_prob_client.get('/follow/').context['page'].object_list[0]
+        except IndexError:
+            response = False
+
+        self.assertEqual(False, False, msg='Пользователь видит посты тех, на кого не подписан')
+
+    def test_comment(self):
+        # Пост к ктоторому будмем добовлять комментарий 
+        post = Post.objects.create(author=self.user2, text='test text')
+
+        # Пробник пустого кверисета
+        sample = Comment.objects.all()
+
+        # Неавторезированный пользователь пытается создать комментарий
+        comment = self.client.post(f'/{self.user2.username}/{post.id}/comment', data={'author':self.user, 'text':'Wubba Lubba Dub Dub'})
+        # Получаем новый кверисет для сравнения
+        comments = Comment.objects.all()
+        self.assertEqual(list(comments), list(sample), msg="Неавторезированный пользователь может создать комментарий")
         
+        # Авторезированный пользователь пытается создать комментарий
+        comment = self.aut_client.post(f'/{self.user2.username}/{post.id}/comment', data={'author':self.user, 'text':'Wubba Lubba Dub Dub'})
+        # Получаем новый кверисет для сравнения
+        comments = Comment.objects.all()
+        self.assertNotEqual(list(comments), list(sample), msg="Авторезированный пользователь неможет создать комментарий")
+        
+        
+
+
+
+
+

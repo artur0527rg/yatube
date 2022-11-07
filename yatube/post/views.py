@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -7,6 +8,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponseNotFound
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
+
 
 from .models import Post, Group, Follow
 from .forms import PostForm, CommentForm
@@ -154,9 +156,7 @@ def add_comment(request, username, post_id):
 def follow_index(request):
     # Находим подписки в промежуточной таблице
     follow_list = Follow.objects.filter(user=request.user)
-    print(follow_list, end='\n\n\n')
     post_list = Post.objects.filter(author__following__in=follow_list).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')
-    print(post_list, end='\n\n\n')
     paginator = Paginator(post_list, 10)  # показывать по 10 записей на странице.
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  # получить записи с нужным смещением
@@ -170,9 +170,13 @@ def follow_index(request):
 
 @login_required()
 def profile_follow(request, username):
-    author = User.objects.get(username=username)
-    Follow.objects.create(user=request.user, author=author)
-    return redirect('profile', username)
+    check = User.objects.get(username=username)
+    if request.user == check:
+        return HttpResponseNotFound('Вы не можете подписаться сами на себя')
+    else:
+        author = User.objects.get(username=username)
+        Follow.objects.create(user=request.user, author=author)
+        return redirect('profile', username)
 
 @login_required
 def profile_unfollow(request, username):
