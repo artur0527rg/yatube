@@ -59,9 +59,12 @@ def new_post(request):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    try:
-        following = Follow.objects.get(user=request.user, author=user)
-    except Follow.DoesNotExist:
+    if request.user.is_authenticated:
+        try:
+            following = Follow.objects.get(user=request.user, author=user)
+        except Follow.DoesNotExist:
+            following = False
+    else:
         following = False
     author_posts = Post.objects.filter(author_id=user).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')  
     paginator = Paginator(author_posts, 10)
