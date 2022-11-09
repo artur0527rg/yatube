@@ -168,12 +168,12 @@ class CacheTest(TestCase):
 
     def test_index_page_test(self):
         cache.clear()# Чистим кеш перед тестом
-
-        post = Post.objects.create(text = "text1", author = self.user)# Создаем тестовый пост
+        
         response = self.aut_client.get('/')# Кешируем страницу
-        response_cache = self.aut_client.get('/')# Кешируем страницу
+        post = Post.objects.create(text = "text1", author = self.user)# Создаем тестовый пост
+        response_cache = self.aut_client.get('/')# Получаем экземпляр
         # Проверяю, передается ли контекст или загружаем страницу с кеша
-        self.assertNotEqual(response.context, response_cache.context, msg='Страница не кешируется')
+        self.assertEqual(response.content, response_cache.content, msg='Страница не кешируется')
         
 
 class FinalTest_6(TestCase):
