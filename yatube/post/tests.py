@@ -120,7 +120,7 @@ class ImgTest(TestCase):
 
         self.group = Group.objects.create(title='First group', slug='first_group', description='text')
     
-
+    # Хрупкий тест
     def test_page_have_img(self):
         with tempfile.TemporaryDirectory() as temp_directory:
             with override_settings(MEDIA_ROOT=temp_directory):
@@ -130,16 +130,24 @@ class ImgTest(TestCase):
                     cache.clear() #чистим кеш, что бы нужный пост отобразился
 
                     page = self.aut_client.get(f'/{self.user.username}/')
-                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
+                    self.assertContains(page, 'unique_id')
+                    # self.assertContains(page, '<img')
+                    # self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
         
                     page = self.aut_client.get(f'/')
-                    self.assertIn('<img', str(page.content), msg='Картинки нет на главной странице')
+                    self.assertContains(page, 'unique_id')
+                    # self.assertContains(page, '<img')
+                    # self.assertIn('<img', str(page.content), msg='Картинки нет на главной странице')
         
                     page = self.aut_client.get(f'/{self.user.username}/')
-                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице автора')
+                    self.assertContains(page, 'unique_id')
+                    # self.assertContains(page, '<img')
+                    # self.assertIn('<img', str(page.content), msg='Картинки нет на странице автора')
 
                     page = self.aut_client.get(f'/group/first_group/')
-                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице группы')
+                    self.assertContains(page, 'unique_id')
+                    # self.assertContains(page, '<img')
+                    # self.assertIn('<img', str(page.content), msg='Картинки нет на странице группы')
 
     def test_incorrect_file_format(self):
         with open('db.sqlite3','rb') as file:
