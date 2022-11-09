@@ -1,6 +1,6 @@
 # Каждый логический набор тестов — это класс, 
 # который наследуется от базового класса TestCase
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test import Client
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -9,6 +9,8 @@ from django.core.cache import cache
 
 from .models import Post, Group, Follow, Comment
 from .forms import PostForm
+
+import tempfile
 
 # Каждый класс — это набор тестов. Имя такого класса принято начинать со слова Test.
 # В файле может быть множество наборов тестов, 
@@ -120,22 +122,24 @@ class ImgTest(TestCase):
     
 
     def test_page_have_img(self):
-        with open('media/post/file.jpg','rb') as img:
-            self.post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': img})
+        with tempfile.TemporaryDirectory() as temp_directory:
+            with override_settings(MEDIA_ROOT=temp_directory):
+                with open('media/post/file.jpg','rb') as img:
+                    self.post = self.aut_client.post("/new/", {'author': self.user, 'text': 'post with image', 'group': self.group.pk, 'image': img})
 
-        cache.clear() #чистим кеш, что бы нужный пост отобразился
+                    cache.clear() #чистим кеш, что бы нужный пост отобразился
 
-        page = self.aut_client.get(f'/{self.user.username}/')
-        self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
+                    page = self.aut_client.get(f'/{self.user.username}/')
+                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице поста')
         
-        page = self.aut_client.get(f'/')
-        self.assertIn('<img', str(page.content), msg='Картинки нет на главной странице')
+                    page = self.aut_client.get(f'/')
+                    self.assertIn('<img', str(page.content), msg='Картинки нет на главной странице')
         
-        page = self.aut_client.get(f'/{self.user.username}/')
-        self.assertIn('<img', str(page.content), msg='Картинки нет на странице автора')
+                    page = self.aut_client.get(f'/{self.user.username}/')
+                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице автора')
 
-        page = self.aut_client.get(f'/group/first_group/')
-        self.assertIn('<img', str(page.content), msg='Картинки нет на странице группы')
+                    page = self.aut_client.get(f'/group/first_group/')
+                    self.assertIn('<img', str(page.content), msg='Картинки нет на странице группы')
 
     def test_incorrect_file_format(self):
         with open('db.sqlite3','rb') as file:
