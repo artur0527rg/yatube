@@ -157,10 +157,9 @@ def add_comment(request, username, post_id):
 
 @login_required()
 def follow_index(request):
-    # Ищим все посты, в которых автор - id в поле following.
-    # Какие записи достать из модели Follow?
-    # Те, в которых user = request.user
-    # Тоисть берем поле following, но фильтруем по user(follower)
+    # Мы ищим пост, author_id которого - id в поле following(related name),
+    # но из модели Follow нам нужно достать только те записи,
+    # в которых  user = request.user
     post_list = (
         Post.objects
         .filter(author__following__user=request.user)
