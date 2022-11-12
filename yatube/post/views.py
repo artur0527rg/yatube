@@ -157,9 +157,17 @@ def add_comment(request, username, post_id):
 
 @login_required()
 def follow_index(request):
-    # Находим подписки в промежуточной таблице
-    follow_list = Follow.objects.filter(user=request.user)
-    post_list = Post.objects.filter(author__following__in=follow_list).order_by('-pub_date').select_related('group', 'author').prefetch_related('comments')
+    # Ищим все посты, в которых автор - id в поле following.
+    # Какие записи достать из модели Follow?
+    # Те, в которых user = request.user
+    # Тоисть берем поле following, но фильтруем по user(follower)
+    post_list = (
+        Post.objects
+        .filter(author__following__user=request.user)
+        .order_by('-pub_date')
+        .select_related('group', 'author')
+        .prefetch_related('comments')
+    )
     paginator = Paginator(post_list, 10)  # показывать по 10 записей на странице.
     page_number = request.GET.get('page')  # переменная в URL с номером запрошенной страницы
     page = paginator.get_page(page_number)  # получить записи с нужным смещением
