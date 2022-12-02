@@ -1,7 +1,7 @@
 # yatube
 Социальная сеть блогеров
  
-Мой учебный для Яндекс Практикума
+Мой учебный проект
 
 git clone https://github.com/artur0527rg/yatube.git
 
